@@ -87,7 +87,11 @@ The focus here is on steps to take, tools to run, things to check. Other files i
   ```
   cat ./scans/open-ports/80.txt | /opt/aquatone -ports large -out enum/aquatone
   ```
-- [ ] 
+- [ ] Run `gobuster` or `dirbuster`, etc. to check for web apps, hidden files/folders, and goodies:
+  ```
+  apt install gobuster
+  gobuster dir -u http://web01/ -x php,asp,aspx,txt,html,htm -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -o enum/gobuster-web01.out
+  ```
 - [ ] Check for Jenkins instances. Typically runs on TCP/8080 (check `aquatone` output).
 
 ## Local PrivEsc
