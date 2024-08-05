@@ -1,5 +1,5 @@
-# OSCP Checklist
-TKTK.
+# OSCP Exam Checklist
+This guide & checklist is recommended resources and steps for targeting the OSCP exam & certification challenge.
 
 The focus here is on steps to take, tools to run, things to check. Other files in this repo have the specific commands to run. I've linked to those where possible.
 
@@ -14,15 +14,14 @@ The focus here is on steps to take, tools to run, things to check. Other files i
     - Brute force guess passwords (SMB, HTTP, RDP, SSH, FTP, etc.)
 
 ## Notes for Reporting
-- TKTK
-- Personally, for OffSec exams, I always take notes directly in the reporting template they provide. Just be sure to take copious notes and screenshots.
-- Take multiple screenshots, especially of web applications. Be mindful of the screenshotting requiremnts (`ipconfig`, `whoami`, etc. in an interactive shell.
-- Ensure that IPs, ports, etc match. For instance, go over the IPs and make sure they all actually ARE CDE IPs. If there's question, hash it out with the client.
+- Read the (OSCP Exam Guide)[https://help.offsec.com/hc/en-us/articles/360040165632-OSCP-Exam-Guide] a few days before exam, and _just_ before you begin so you remember the limitations, restrictions, and reporting requirements.
+- Personally, for OffSec exams, I always take notes directly in [the reporting template they provide](https://www.offsec.com/pwk-online/OSCP-Exam-Report.docx). Just be sure to take copious notes and screenshots.
+- Take multiple screenshots, especially of web applications. Be mindful of the screenshotting requiremnts (`ipconfig`, `whoami`, etc.) in an interactive shell.
 
 ## Preparation
 - [ ] Divide the list of IPs into "external" (i.e., DMZ) and "internal" (unreachable) - e.g., `scope-192.lst` for external, and `scope-172.lst` for internal systems
 - [ ] Make a directory structure for the test:
-  ```
+  ```bash
   mkdir ./oscp-exam
   cd oscp-exam
   mkdir enum    # This will be for enumeration output (e.g., nikto, smb scans, etc.)
@@ -34,15 +33,15 @@ The focus here is on steps to take, tools to run, things to check. Other files i
 
 ## Network Scanning & Enumeration
 - [ ] Masscan the target environment:
-  ```
+  ```bash
   masscan -iL scope-192.lst -p0-65535 -oG scans/masscan-scope-192.lst-allports.gnmap
   ```
 - [ ] Ping sweep (not always necessary as OSCP typically gives IP scope)
-  ```
+  ```bash
   nmap -iL scope-192.lst -sn -T4 -oA scans/nmap-scope-192.lst-sn -v
   ```
 - [ ] Kick off a "flagship" top 1000 port scan. Don't forget to log it in case the scans hang up. Increase to `-T5` if you're feeling adventurous:
-  ```
+  ```bash
   # Nmap with no ping (-Pn), banner grab (-sV), default scripts (-sC). Logs to a tee'd output file.
   nmap -iL scope-192.lst -Pn -sVC -T5 -v -oA scans/nmap-scope-192-Pn-sVC-T5 | tee logs/nmap.log
   # For a larger network with lots of hosts (not OSCP :D)
@@ -50,17 +49,17 @@ The focus here is on steps to take, tools to run, things to check. Other files i
   ```
   - [ ] Check the `masscan` output for additional ports missed in the top 1000 port scan above, and rescan those
 - [ ] Kick off a UDP scan. Key protocols to look out for: SNMP (UDP/161), TFTP (UDP/69), NTP (UDP/123)
-  ```
+  ```bash
   nmap -iL scope-192.lst -sU -T5 -v -oA scans/nmap-scope-192-Pn-sU -Pn    # Optional: can specify --top-ports=25 to do faster scan w/ smaller scope
   ```
 - [ ] Parse through open ports with: https://raw.githubusercontent.com/altjx/ipwn/master/nmap_scripts/nmapscrape.rb
   - This will generate a `./scans/open-ports` directory that will be referenced below
 - [ ] Scan for SMB and for SMB Signing:
-  ```
+  ```bash
   crackmapexec smb ./scans/open-ports/445.txt | tee enum/cme-smb-scan.log
   ```
 - [ ] Scan for top MS vulns:
-  ```
+  ```bash
   nmap -iL open-ports/445.txt -p445 --script=smb-vuln-ms08-067,smb-vuln-ms17-010 -v | tee scans/nmap-smb-vulns.log
   ```
 - [ ] SNMP checks
@@ -76,15 +75,15 @@ The focus here is on steps to take, tools to run, things to check. Other files i
 - [ ] Fire up Burp Suite, and configure the scope to include all web services
 - [ ] Manually browse to each web application through Burp to log all requests and build out a tree in the `Target` > `Site Map` tab.
 - [ ] Check raw responses to identify web stack, redirects, etc. -- `web02` used as example of TCP/80 open on a web site:
-  ```
+  ```bash
   curl -I http://web02    # Fetches only the headers, may need -k for https
   ```
 - [ ] Run `nikto` to automate a lot of the checks:
-  ```
+  ```bash
   nikto -host http://web02 -output enum/nikto-http-web02
   ```
 - [ ] If there are a lot of web services, you may want to run [`aquatone`](https://github.com/michenriksen/aquatone), [`gowitness`](https://github.com/sensepost/gowitness), etc.
-  ```
+  ```bash
   cat ./scans/open-ports/80.txt | /opt/aquatone -ports large -out enum/aquatone
   ```
 - [ ] Run `gobuster` or `dirbuster`, etc. to check for web apps, hidden files/folders, and goodies:
@@ -123,24 +122,23 @@ Assuming you have compromised a domain user or domain-joined system:
   - [ ] Check for servers AND users that are configured for constrained delegation
 - [ ] Roasting Kerberos. I like to use `impacket` for this, but you can definitely use `Rubeus` or various PowerShell tooling if you get a foothold on a Windows box.
   - [ ] Kerberoast: 
-    ```
+    ```shell
     impacket-GetUserSPNs corp.com/mayh3m:'P@ssw0rd!' -outputfile loot/kerber.rst
     ```
   - [ ] AS-REP roast:
-    ```
+    ```shell
     impacket-GetNPUsers corp.com/mayh3m:'P@ssw0rd!' -outputfile loot/asrep.rst
     ```
   - [ ] Cracking offline. With OSCP, if a hash is intended to be crackable, you should probably be ok using `rockyou.txt` with default rules.
-    ```
+    ```shell
     # May need to gunzip rockyou.txt first
     gunzip /usr/share/wordlists/rockyou.txt.gz
     john loot/kerber.rst --wordlist=/usr/share/wordlists/rockyou.txt --rules
     john loot/asrep.rst --wordlist=/usr/share/wordlists/rockyou.txt --rules
     ```
 - [ ] Enumerate SMB servers with all creds. Use `smbclient.py` and `crackmapexec` to search for interesting files in those shares that you can access
-  ```
+  ```shell
   crackmapexec smb -u loot/users.lst -p loot/cleartext-passwords.txt -d corp.com scope-172.lst
   crackmapexec smb -u USER -p PASS -d corp.com --shares scope-172.lst | tee enum/cme-enumshares.lst
   grep READ enum/cme-enumshares.lst
   ```
-- [ ] Check domain 
