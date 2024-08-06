@@ -58,16 +58,16 @@ The focus here is on steps to take, tools to run, things to check. Other files i
   ```bash
   crackmapexec smb ./scans/open-ports/445.txt | tee enum/cme-smb-scan.log
   ```
-- [ ] Scan for top MS vulns:
+- [ ] Scan for old critical Microsoft SMB vulnerabilities:
   ```bash
   nmap -iL open-ports/445.txt -p445 --script=smb-vuln-ms08-067,smb-vuln-ms17-010 -v | tee scans/nmap-smb-vulns.log
   ```
 - [ ] SNMP checks
-- [ ] `rpcclient` Check for NULL sessions, enum info if auth'd
-- [ ] KRB guessing
+- [ ] `rpcclient` Check for NULL sessions, enumerate info if you get a successful auth
+- [ ] Kerberos username guessing (KRB guessing) if you need to obtain a user list
 - [ ] Check for database issues:
   - PostgreSQL: check for unauthenticated instances with `postgres:` (MSF module: `auxiliary/scanner/postgres/postgres_login`)
-    - **This results in automatic RCE via `COPY TO` if version is >=9.3!**
+    - *This results in automatic RCE via `COPY TO` if version is >=9.3!*
   - MSSQL: `sa:sa`, `sa:`, and similar (MSF module: `auxiliary/scanner/mssql/mssql_login`)
 - [ ] Check for port 12721, java deserialization on vCenter. Can use `nmap -sV --script rmi-* ip` to validate
 
@@ -82,7 +82,7 @@ The focus here is on steps to take, tools to run, things to check. Other files i
   ```bash
   nikto -host http://web02 -output enum/nikto-http-web02
   ```
-- [ ] If there are a lot of web services, you may want to run [`aquatone`](https://github.com/michenriksen/aquatone), [`gowitness`](https://github.com/sensepost/gowitness), etc.
+- [ ] [NON-OSCP] If there are a lot of web services, you may want to run [`httpx`](https://github.com/projectdiscovery/httpx) or [`aquatone`](https://github.com/michenriksen/aquatone), [`gowitness`](https://github.com/sensepost/gowitness), etc.
   ```bash
   cat ./scans/open-ports/80.txt | /opt/aquatone -ports large -out enum/aquatone
   ```
@@ -94,8 +94,8 @@ The focus here is on steps to take, tools to run, things to check. Other files i
 - [ ] Check for Jenkins instances. Typically runs on TCP/8080 (check `aquatone` output).
 
 ## Local PrivEsc
-- Local priv esc: 
-    - https://book.hacktricks.xyz/windows/checklist-windows-privilege-escalation
+- Windows:
+    - Reference the [HackTricks Windows priv esc checklist](https://book.hacktricks.xyz/windows/checklist-windows-privilege-escalation)
     - https://book.hacktricks.xyz/windows/windows-local-privilege-escalation
     - https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS
 - Check common places for creds:
