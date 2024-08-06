@@ -36,14 +36,14 @@ The focus here is on steps to take, tools to run, things to check. Other files i
   ```bash
   masscan -iL scope-192.lst -p0-65535 -oG scans/masscan-scope-192.lst-allports.gnmap
   ```
-- [ ] Ping sweep (not always necessary as OSCP typically gives IP scope)
+- [ ] OPTIONAL: Ping sweep (not always necessary as OSCP typically gives IP scope)
   ```bash
   nmap -iL scope-192.lst -sn -T4 -oA scans/nmap-scope-192.lst-sn -v
   ```
 - [ ] Kick off a "flagship" top 1000 port scan. Don't forget to log it in case the scans hang up. Increase to `-T5` if you're feeling adventurous:
   ```bash
   # Nmap with no ping (-Pn), banner grab (-sV), default scripts (-sC). Logs to a tee'd output file.
-  nmap -iL scope-192.lst -Pn -sVC -T5 -v -oA scans/nmap-scope-192-Pn-sVC-T5 | tee logs/nmap.log
+  nmap -iL scope-192.lst -Pn -sVC -T4 -v -oA scans/nmap-scope-192-Pn-sVC-T5 | tee logs/nmap.log
   # For a larger network with lots of hosts (not OSCP :D)
   nmap -iL scope-internal.lst -sV -sC -oA scans/nmap-sV-sC --open --max-retries=1 --min-parallelism=128 --min-hostgroup=128 -v | tee logs/nmap.log
   ```
