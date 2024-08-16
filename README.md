@@ -14,7 +14,7 @@ The focus here is on steps to take, tools to run, things to check. Other files i
     - Brute force guess passwords (SMB, HTTP, RDP, SSH, FTP, etc.)
 
 ## Notes for Reporting
-- Read the (OSCP Exam Guide)[https://help.offsec.com/hc/en-us/articles/360040165632-OSCP-Exam-Guide] a few days before exam, and _just_ before you begin so you remember the limitations, restrictions, and reporting requirements.
+- Read the [OSCP Exam Guide](https://help.offsec.com/hc/en-us/articles/360040165632-OSCP-Exam-Guide) a few days before exam, and _just_ before you begin so you remember the limitations, restrictions, and reporting requirements.
 - Personally, for OffSec exams, I always take notes directly in [the reporting template they provide](https://www.offsec.com/pwk-online/OSCP-Exam-Report.docx). Just be sure to take copious notes and screenshots.
 - Take multiple screenshots, especially of web applications. Be mindful of the screenshotting requiremnts (`ipconfig`, `whoami`, etc.) in an interactive shell.
 
